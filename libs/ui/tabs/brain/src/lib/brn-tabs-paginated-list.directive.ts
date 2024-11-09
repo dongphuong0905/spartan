@@ -26,18 +26,18 @@ import {
 	ChangeDetectorRef,
 	Directive,
 	ElementRef,
-	EventEmitter,
 	Injector,
 	NgZone,
 	type OnDestroy,
-	Output,
 	type QueryList,
+	Signal,
 	afterNextRender,
 	booleanAttribute,
 	computed,
 	effect,
 	inject,
 	input,
+	output,
 	signal,
 } from '@angular/core';
 import { EMPTY, Observable, type Observer, Subject, fromEvent, merge, of as observableOf, timer } from 'rxjs';
@@ -79,12 +79,12 @@ export type BrnPaginatedTabHeaderItem = FocusableOption & { elementRef: ElementR
 export abstract class BrnTabsPaginatedListDirective
 	implements AfterContentChecked, AfterContentInit, AfterViewInit, OnDestroy
 {
-	abstract _items: QueryList<BrnPaginatedTabHeaderItem>;
-	abstract _tabListContainer: ElementRef<HTMLElement>;
-	abstract _tabList: ElementRef<HTMLElement>;
-	abstract _tabListInner: ElementRef<HTMLElement>;
-	abstract _nextPaginator: ElementRef<HTMLElement>;
-	abstract _previousPaginator: ElementRef<HTMLElement>;
+	public abstract _items: QueryList<BrnPaginatedTabHeaderItem>;
+	public abstract _tabListContainer: Signal<ElementRef<HTMLElement>>;
+	public abstract _tabList: Signal<ElementRef<HTMLElement>>;
+	public abstract _tabListInner: Signal<ElementRef<HTMLElement>>;
+	public abstract _nextPaginator: Signal<ElementRef<HTMLElement>>;
+	public abstract _previousPaginator: Signal<ElementRef<HTMLElement>>;
 
 	/** The distance in pixels that the tab labels should be translated to the left. */
 	private _scrollDistance = 0;
@@ -92,7 +92,7 @@ export abstract class BrnTabsPaginatedListDirective
 	/** Whether the header should scroll to the selected index after the view has been checked. */
 	private _selectedIndexChanged = false;
 
-	private _root = inject(BrnTabsDirective);
+	private readonly _root = inject(BrnTabsDirective);
 	private readonly _activeTab = this._root.$activeTab;
 	private readonly _tabs = this._root.$tabs;
 
@@ -100,13 +100,13 @@ export abstract class BrnTabsPaginatedListDirective
 	protected readonly _destroyed = new Subject<void>();
 
 	/** Whether the controls for pagination should be displayed */
-	_showPaginationControls = signal(false);
+	public _showPaginationControls = signal(false);
 
 	/** Whether the tab list can be scrolled more towards the end of the tab label list. */
-	_disableScrollAfter = true;
+	public _disableScrollAfter = true;
 
 	/** Whether the tab list can be scrolled more towards the beginning of the tab label list. */
-	_disableScrollBefore = true;
+	public _disableScrollBefore = true;
 
 	/**
 	 * The number of tab labels that are displayed on the header. When this changes, the header
@@ -124,16 +124,16 @@ export abstract class BrnTabsPaginatedListDirective
 	private _currentTextContent!: string;
 
 	/** Stream that will stop the automated scrolling. */
-	private _stopScrolling = new Subject<void>();
+	private readonly _stopScrolling = new Subject<void>();
 
 	/**
 	 * Whether pagination should be disabled. This can be used to avoid unnecessary
 	 * layout recalculations if it's known that pagination won't be required.
 	 */
-	disablePagination = input(false, { transform: booleanAttribute });
+	public disablePagination = input(false, { transform: booleanAttribute });
 
 	/** The index of the active tab. */
-	private _selectedIndex = computed(() => {
+	private readonly _selectedIndex = computed(() => {
 		const currentTabKey = this._activeTab();
 		const tabs = this._tabs();
 
@@ -149,21 +149,21 @@ export abstract class BrnTabsPaginatedListDirective
 	});
 
 	/** Event emitted when the option is selected. */
-	@Output() readonly selectFocusedIndex: EventEmitter<number> = new EventEmitter<number>();
+	public readonly selectFocusedIndex = output<number>();
 
 	/** Event emitted when a label is focused. */
-	@Output() readonly indexFocused: EventEmitter<number> = new EventEmitter<number>();
+	public readonly indexFocused = output<number>();
 
-	private _sharedResizeObserver = inject(SharedResizeObserver);
+	private readonly _sharedResizeObserver = inject(SharedResizeObserver);
 
-	private _injector = inject(Injector);
+	private readonly _injector = inject(Injector);
 
 	protected _elementRef: ElementRef<HTMLElement> = inject(ElementRef);
 	protected _changeDetectorRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-	private _viewportRuler: ViewportRuler = inject(ViewportRuler);
-	private _dir = inject(Directionality, { optional: true });
-	private _ngZone: NgZone = inject(NgZone);
-	private _platform: Platform = inject(Platform);
+	private readonly _viewportRuler: ViewportRuler = inject(ViewportRuler);
+	private readonly _dir = inject(Directionality, { optional: true });
+	private readonly _ngZone: NgZone = inject(NgZone);
+	private readonly _platform: Platform = inject(Platform);
 	public _animationMode = inject(ANIMATION_MODULE_TYPE, { optional: true });
 
 	constructor() {
@@ -193,13 +193,13 @@ export abstract class BrnTabsPaginatedListDirective
 
 	ngAfterViewInit() {
 		// We need to handle these events manually, because we want to bind passive event listeners.
-		fromEvent(this._previousPaginator.nativeElement, 'touchstart', passiveEventListenerOptions)
+		fromEvent(this._previousPaginator().nativeElement, 'touchstart', passiveEventListenerOptions)
 			.pipe(takeUntil(this._destroyed))
 			.subscribe(() => {
 				this._handlePaginatorPress('before');
 			});
 
-		fromEvent(this._nextPaginator.nativeElement, 'touchstart', passiveEventListenerOptions)
+		fromEvent(this._nextPaginator().nativeElement, 'touchstart', passiveEventListenerOptions)
 			.pipe(takeUntil(this._destroyed))
 			.subscribe(() => {
 				this._handlePaginatorPress('after');
@@ -388,12 +388,12 @@ export abstract class BrnTabsPaginatedListDirective
 	}
 
 	/** Tracks which element has focus; used for keyboard navigation */
-	get focusIndex(): number {
+	public get focusIndex(): number {
 		return this._keyManager ? (this._keyManager.activeItemIndex ?? 0) : 0;
 	}
 
 	/** When the focus index is set, we must manually send focus to the correct label */
-	set focusIndex(value: number) {
+	public set focusIndex(value: number) {
 		if (!this._isValidIndex(value) || this.focusIndex === value || !this._keyManager) {
 			return;
 		}
@@ -424,7 +424,7 @@ export abstract class BrnTabsPaginatedListDirective
 			// Do not let the browser manage scrolling to focus the element, this will be handled
 			// by using translation. In LTR, the scroll left should be 0. In RTL, the scroll width
 			// should be the full width minus the offset width.
-			const containerEl = this._tabListContainer.nativeElement;
+			const containerEl = this._tabListContainer().nativeElement;
 			const dir = this._getLayoutDirection();
 
 			if (dir === 'ltr') {
@@ -455,22 +455,22 @@ export abstract class BrnTabsPaginatedListDirective
 		// See: https://github.com/angular/components/issues/10276
 		// We round the `transform` here, because transforms with sub-pixel precision cause some
 		// browsers to blur the content of the element.
-		this._tabList.nativeElement.style.transform = `translateX(${Math.round(translateX)}px)`;
+		this._tabList().nativeElement.style.transform = `translateX(${Math.round(translateX)}px)`;
 
 		// Setting the `transform` on IE will change the scroll offset of the parent, causing the
 		// position to be thrown off in some cases. We have to reset it ourselves to ensure that
 		// it doesn't get thrown off. Note that we scope it only to IE and Edge, because messing
 		// with the scroll position throws off Chrome 71+ in RTL mode (see #14689).
 		if (this._platform.TRIDENT || this._platform.EDGE) {
-			this._tabListContainer.nativeElement.scrollLeft = 0;
+			this._tabListContainer().nativeElement.scrollLeft = 0;
 		}
 	}
 
 	/** Sets the distance in pixels that the tab header should be transformed in the X-axis. */
-	get scrollDistance(): number {
+	public get scrollDistance(): number {
 		return this._scrollDistance;
 	}
-	set scrollDistance(value: number) {
+	public set scrollDistance(value: number) {
 		this._scrollTo(value);
 	}
 
@@ -483,7 +483,7 @@ export abstract class BrnTabsPaginatedListDirective
 	 * should be called sparingly.
 	 */
 	_scrollHeader(direction: ScrollDirection) {
-		const viewLength = this._tabListContainer.nativeElement.offsetWidth;
+		const viewLength = this._tabListContainer().nativeElement.offsetWidth;
 
 		// Move the scroll distance one-third the length of the tab list's viewport.
 		const scrollAmount = ((direction === 'before' ? -1 : 1) * viewLength) / 3;
@@ -515,7 +515,7 @@ export abstract class BrnTabsPaginatedListDirective
 		}
 
 		// The view length is the visible width of the tab labels.
-		const viewLength = this._tabListContainer.nativeElement.offsetWidth;
+		const viewLength = this._tabListContainer().nativeElement.offsetWidth;
 		const { offsetLeft, offsetWidth } = selectedLabel.elementRef.nativeElement;
 
 		let labelBeforePos: number;
@@ -524,7 +524,7 @@ export abstract class BrnTabsPaginatedListDirective
 			labelBeforePos = offsetLeft;
 			labelAfterPos = labelBeforePos + offsetWidth;
 		} else {
-			labelAfterPos = this._tabListInner.nativeElement.offsetWidth - offsetLeft;
+			labelAfterPos = this._tabListInner().nativeElement.offsetWidth - offsetLeft;
 			labelBeforePos = labelAfterPos - offsetWidth;
 		}
 
@@ -552,7 +552,7 @@ export abstract class BrnTabsPaginatedListDirective
 		if (this.disablePagination()) {
 			this._showPaginationControls.set(false);
 		} else {
-			const isEnabled = this._tabListInner.nativeElement.scrollWidth > this._elementRef.nativeElement.offsetWidth;
+			const isEnabled = this._tabListInner().nativeElement.scrollWidth > this._elementRef.nativeElement.offsetWidth;
 
 			if (!isEnabled) {
 				this.scrollDistance = 0;
@@ -594,8 +594,8 @@ export abstract class BrnTabsPaginatedListDirective
 	 * should be called sparingly.
 	 */
 	_getMaxScrollDistance(): number {
-		const lengthOfTabList = this._tabListInner.nativeElement.scrollWidth;
-		const viewLength = this._tabListContainer.nativeElement.offsetWidth;
+		const lengthOfTabList = this._tabListInner().nativeElement.scrollWidth;
+		const viewLength = this._tabListContainer().nativeElement.offsetWidth;
 		return lengthOfTabList - viewLength || 0;
 	}
 

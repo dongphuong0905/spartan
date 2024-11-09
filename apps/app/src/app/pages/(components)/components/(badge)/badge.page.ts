@@ -99,7 +99,7 @@ export const routeMeta: RouteMeta = {
 			</spartan-tabs>
 
 			<spartan-page-bottom-nav>
-				<spartan-page-bottom-nav-link href="button" label="Button" />
+				<spartan-page-bottom-nav-link href="breadcrumb" label="Breadcrumb" />
 				<spartan-page-bottom-nav-link direction="previous" href="avatar" label="Avatar" />
 			</spartan-page-bottom-nav>
 		</section>
@@ -107,11 +107,11 @@ export const routeMeta: RouteMeta = {
 	`,
 })
 export default class BadgePageComponent {
-	readonly defaultCode = defaultCode;
-	readonly defaultSkeleton = defaultSkeleton;
-	readonly defaultImports = defaultImports;
+	public readonly defaultCode = defaultCode;
+	public readonly defaultSkeleton = defaultSkeleton;
+	public readonly defaultImports = defaultImports;
 
-	readonly secondaryCode = secondaryCode;
-	readonly outlineCode = outlineCode;
-	readonly destructiveCode = destructiveCode;
+	public readonly secondaryCode = secondaryCode;
+	public readonly outlineCode = outlineCode;
+	public readonly destructiveCode = destructiveCode;
 }

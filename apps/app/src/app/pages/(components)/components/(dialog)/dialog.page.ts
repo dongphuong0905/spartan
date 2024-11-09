@@ -1,7 +1,7 @@
 import type { RouteMeta } from '@analogjs/router';
 import { Component } from '@angular/core';
 import { provideIcons } from '@ng-icons/core';
-import { lucideAlertTriangle } from '@ng-icons/lucide';
+import { lucideTriangleAlert } from '@ng-icons/lucide';
 import {
 	HlmAlertDescriptionDirective,
 	HlmAlertDirective,
@@ -59,7 +59,7 @@ export const routeMeta: RouteMeta = {
 		HlmAlertTitleDirective,
 		DialogDeclarativePreviewComponent,
 	],
-	providers: [provideIcons({ lucideAlertTriangle })],
+	providers: [provideIcons({ lucideTriangleAlert })],
 	template: `
 		<section spartanMainSection>
 			<spartan-section-intro
@@ -117,7 +117,7 @@ export const routeMeta: RouteMeta = {
 				alternative, which takes in a reference to the brn-dialog. That way you can avoid nesting the template.
 			</p>
 			<div hlmAlert class="mb-6" variant="destructive">
-				<hlm-icon name="lucideAlertTriangle" hlmAlertIcon />
+				<hlm-icon name="lucideTriangleAlert" hlmAlertIcon />
 				<p hlmAlertTitle>Note</p>
 				<p hlmAlertDescription class="leading-loose">
 					Do not use the
@@ -146,6 +146,17 @@ export const routeMeta: RouteMeta = {
 				<code class="${hlmCode}">injectBrnDialogContext</code>
 				function.
 			</p>
+			<div hlmAlert class="mb-6" variant="destructive">
+				<hlm-icon name="lucideTriangleAlert" hlmAlertIcon />
+				<p hlmAlertTitle>Note</p>
+				<p hlmAlertDescription class="leading-loose">
+					Avoid using the
+					<code class="${hlmCode}">&lt;hlm-dialog-content&gt;</code>
+					tag when your dialog relies on dynamic content. Using it in this case can cause the dialog to repeatedly
+					render itself in a loop. The tag is meant to wrap static content for the dialog, but with a dynamic component,
+					the component automatically acts as the wrapper.
+				</p>
+			</div>
 			<spartan-tabs firstTab="Preview" secondTab="Code">
 				<div spartanCodePreview firstTab>
 					<spartan-dialog-dynamic-component-preview />
