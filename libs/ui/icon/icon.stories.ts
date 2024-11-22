@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as lucide from '@ng-icons/lucide';
-import { lucideHome } from '@ng-icons/lucide';
+import { lucideHouse } from '@ng-icons/lucide';
 import { type Meta, type StoryObj, argsToTemplate, moduleMetadata } from '@storybook/angular';
 import { HlmIconComponent, type IconSize, provideIcons } from './helm/src';
 
@@ -25,7 +25,7 @@ export const Default: Story = {
 		name: 'lucideCheck',
 		size: 'sm',
 		color: 'red',
-		class: '',
+		userClass: '',
 		strokeWidth: 1,
 	},
 	argTypes: {
@@ -41,7 +41,7 @@ export const Default: Story = {
 
 export const Tailwind: Story = {
 	args: {
-		class: 'text-red-600 text-5xl',
+		userClass: 'text-red-600 text-5xl',
 		name: 'lucideCheck',
 	},
 	argTypes: {
@@ -57,9 +57,9 @@ export const Tailwind: Story = {
 	selector: 'icon-dynamic-story',
 	standalone: true,
 	imports: [FormsModule, HlmIconComponent],
-	providers: [provideIcons({ lucideHome })],
+	providers: [provideIcons({ lucideHouse })],
 	template: /* HTML */ `
-		<hlm-icon name="lucideHome" [size]="size()" />
+		<hlm-icon name="lucideHouse" [size]="size()" />
 		<div>Bound property value: {{size()}}</div>
 
 		<div class="flex flex-row gap-x-2">

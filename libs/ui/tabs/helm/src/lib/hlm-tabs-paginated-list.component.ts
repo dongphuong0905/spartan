@@ -1,5 +1,5 @@
 import { CdkObserveContent } from '@angular/cdk/observers';
-import { Component, ContentChildren, type ElementRef, type QueryList, ViewChild, computed, input } from '@angular/core';
+import { Component, ContentChildren, type ElementRef, type QueryList, computed, input, viewChild } from '@angular/core';
 import { lucideChevronLeft, lucideChevronRight } from '@ng-icons/lucide';
 import { buttonVariants } from '@spartan-ng/ui-button-helm';
 import { hlm } from '@spartan-ng/ui-core';
@@ -62,13 +62,13 @@ import { listVariants } from './hlm-tabs-list.component';
 })
 export class HlmTabsPaginatedListComponent extends BrnTabsPaginatedListDirective {
 	@ContentChildren(BrnTabsTriggerDirective, { descendants: false })
-	_items!: QueryList<BrnTabsTriggerDirective>;
-	@ViewChild('tabListContainer', { static: true })
-	_tabListContainer!: ElementRef;
-	@ViewChild('tabList', { static: true }) _tabList!: ElementRef;
-	@ViewChild('tabListInner', { static: true }) _tabListInner!: ElementRef;
-	@ViewChild('nextPaginator') _nextPaginator!: ElementRef<HTMLElement>;
-	@ViewChild('previousPaginator') _previousPaginator!: ElementRef<HTMLElement>;
+	public _items!: QueryList<BrnTabsTriggerDirective>;
+
+	public _tabListContainer = viewChild.required<ElementRef<HTMLElement>>('tabListContainer');
+	public _tabList = viewChild.required<ElementRef<HTMLElement>>('tabList');
+	public _tabListInner = viewChild.required<ElementRef<HTMLElement>>('tabListInner');
+	public _nextPaginator = viewChild.required<ElementRef<HTMLElement>>('nextPaginator');
+	public _previousPaginator = viewChild.required<ElementRef<HTMLElement>>('previousPaginator');
 
 	public readonly userClass = input<ClassValue>('', { alias: 'class' });
 	protected _computedClass = computed(() => hlm('flex overflow-hidden relative flex-shrink-0', this.userClass()));
