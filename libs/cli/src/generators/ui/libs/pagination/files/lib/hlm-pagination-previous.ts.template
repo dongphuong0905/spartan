@@ -16,8 +16,8 @@ import { HlmPaginationLink } from './hlm-pagination-link';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	template: `
 		<a
-			[class]="_computedClass()"
 			hlmPaginationLink
+			[class]="_computedClass()"
 			[link]="link()"
 			[queryParams]="queryParams()"
 			[queryParamsHandling]="queryParamsHandling()"
